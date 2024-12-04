@@ -2,6 +2,8 @@
 // used linfa now
 // Tried to name 3 predetermined clusters but some countries were mixed up such as afganistan(safest),brazil(moderelty safe(dangerous))
 
+//testing out this 
+
 //make cluster first and then name clusters based on score and accuracy
 // use chatgpt to make larger dataset of random countrires and data 
 use std::cmp::Ordering;
