@@ -1,0 +1,11 @@
+[package]
+name = "ds210_project"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+csv = "1.2"                
+ndarray = "0.16"            
+ndarray-rand = "0.14"      
+rand = "0.8"              
+rand_distr = "0.4"
