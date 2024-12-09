@@ -1,15 +1,12 @@
 use csv::ReaderBuilder;
 use ndarray::{Array2, Array1, s};
-use rand::Rng;
-use rand_distr::{Distribution, StandardNormal};
-use ndarray_rand::RandomExt;
 use std::error::Error;
 use std::fmt;
-use std::path::Path;
 
-// Define ColumnVal for holding different types of data (e.g., country names, scores)
+
+// Defines ColumnVal for holding country names and scores
 #[derive(Debug, Clone)]
-enum ColumnVal {
+pub enum ColumnVal {
     Country(String),
     Score(f64),
 }
@@ -18,8 +15,8 @@ enum ColumnVal {
 impl fmt::Display for ColumnVal {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ColumnVal::Country(val) => write!(f, "{}", val),  // Display country name
-            ColumnVal::Score(val) => write!(f, "{:.2}", val), // Display score with 2 decimals
+            ColumnVal::Country(val) => write!(f, "{}", val),  // Displays country name
+            ColumnVal::Score(val) => write!(f, "{:.2}", val), // Displays score with 2 decimals
         }
     }
 }
@@ -27,12 +24,13 @@ impl fmt::Display for ColumnVal {
 // Define DataFrame structure for holding labels, types, and rows
 #[derive(Debug)]
 pub struct DataFrame {
-    labels: Vec<String>,
-    types: Vec<u32>,
-    rows: Vec<Vec<ColumnVal>>,
+    pub labels: Vec<String>,
+    pub types: Vec<u32>,
+    pub rows: Vec<Vec<ColumnVal>>,
 }
 
 impl DataFrame {
+    // Initialized the DataFrame
     pub fn new() -> Self {
         DataFrame {
             labels: Vec::new(),
@@ -40,11 +38,11 @@ impl DataFrame {
             rows: Vec::new(),
         }
     }
-
+    // Reads the CSV file and turns it into a vector of values
     pub fn read_csv(&mut self, path: &str, types: &Vec<u32>) -> Result<(), Box<dyn Error>> {
         let mut rdr = ReaderBuilder::new()
             .delimiter(b',')
-            .has_headers(true) // Assuming the first row is headers
+            .has_headers(true) // Assumes the first row is headers
             .flexible(true)
             .from_path(path)?;
 
@@ -85,6 +83,7 @@ impl DataFrame {
         Ok(())
     }
 
+    // Gets data from the other columns and puts it in vectors as an f64 value
     pub fn get_scores(&self) -> Vec<Array1<f64>> {
         self.rows
             .iter()
