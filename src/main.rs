@@ -23,15 +23,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     let types = vec![1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
 
     // Read the CSV file
-    df.read_csv("most-dangerous-countries-for-women-2024.csv", &types)?;
+    df.read_csv("Most Dangerous Countries.csv", &types)?;
 
     // Extract scores (using the Women Peace and Security Index Score as the primary metric)
     let scores: Vec<f64> = df.rows.iter()
-        .map(|row| {
-            match &row[1] {
-                ColumnVal::Score(val) => *val,
-                _ => 0.0  // Default to 0 if no score
-            }
+        .map(|row| match &row[1] {
+            ColumnVal::Score(val) => *val,
+            _ => 0.0, // Default to 0 if no score
         })
         .collect();
 
@@ -44,42 +42,40 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Perform clustering
     let clusters = simple_clustering(&similarity_matrix, scores.clone());
 
-    // Prepare results based on score ranges
+    // Prepare results based on cluster IDs
     let mut clustered_countries: HashMap<String, Vec<(String, f64)>> = HashMap::new();
 
-    // Classify countries based on their score into one of three categories
-    for (i, score) in scores.iter().enumerate() {
+    // Mapping cluster IDs to their respective categories
+    let cluster_map = vec![
+        (0, "Most Dangerous Countries"),
+        (1, "Moderately Safe Countries"),
+        (2, "Safest Countries"),
+    ];
+
+    for (i, &cluster_id) in clusters.iter().enumerate() {
         let country = match &df.rows[i][0] {
             ColumnVal::Country(name) => name.clone(),
             _ => continue,
         };
-        
-        // Classify based on the score ranges
-        let category = if *score <= 0.60 {
-            "Most Dangerous Countries"
-        } else if *score <= 0.80 {
-            "Moderately Safe Countries"
-        } else {
-            "Safest Countries"
-        };
 
-        clustered_countries.entry(category.to_string())
-            .or_insert_with(Vec::new)
-            .push((country, *score));
+        if let Some(category) = cluster_map.iter().find(|&&(id, _)| id == cluster_id) {
+            clustered_countries
+                .entry(category.1.to_string())
+                .or_insert_with(Vec::new)
+                .push((country, scores[i]));
+        }
     }
 
     println!("Clustering of Countries by Danger to Women:");
 
-    // Mapping cluster categories to their names
-    let cluster_names = ["Most Dangerous Countries", "Moderately Safe Countries", "Safest Countries"];
-    
-    for name in cluster_names.iter() {
-        println!("\n{}:", name);
-        if let Some(countries) = clustered_countries.get(*name) {
-            // Sort the countries differently depending on the category
+    // Iterate over categories and display results
+    for (_, category_name) in cluster_map {
+        println!("\n{}:", category_name);
+        if let Some(countries) = clustered_countries.get(category_name) {
             let mut sorted_countries = countries.clone();
-            
-            if *name == "Most Dangerous Countries" {
+
+            // Sort by ascending for "Most Dangerous", descending otherwise
+            if category_name == "Most Dangerous Countries" {
                 sorted_countries.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
             } else {
                 sorted_countries.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
@@ -95,6 +91,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
 
 
 #[cfg(test)]

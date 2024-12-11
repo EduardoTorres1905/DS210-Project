@@ -37,14 +37,14 @@ pub fn simple_clustering(similarity_matrix: &Array2<f64>, scores: Vec<f64>) -> V
         .map(|row| row.mean().unwrap_or(0.0))
         .collect();
 
-    // Assign clusters based on thresholds (Updated thresholds)
+    // Assign clusters based on thresholds
     for i in 0..n {
-        if avg_scores[i] <= 0.6 {
-            clusters[i] = 0; // Most Dangerous Countries (0.0 - 0.6)
-        } else if avg_scores[i] <= 0.8 {
-            clusters[i] = 1; // Moderately Dangerous Countries (0.6 - 0.8)
+        if scores[i] <= 0.6 {
+            clusters[i] = 0; // Most Dangerous Countries
+        } else if scores[i] <= 0.8 {
+            clusters[i] = 1; // Moderately Safe Countries
         } else {
-            clusters[i] = 2; // Safest Countries (0.8 - 1.0)
+            clusters[i] = 2; // Safest Countries
         }
     }
 
